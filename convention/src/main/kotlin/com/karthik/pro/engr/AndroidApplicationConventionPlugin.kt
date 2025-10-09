@@ -65,7 +65,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             // All Variants Preview
             libs.findLibrary("all-variants-preview").ifPresent { add("implementation", it.get()) }
 
-
             // ViewModel helpers
             libs.findLibrary("androidx-lifecycle-viewmodel-ktx").ifPresent { add("implementation", it.get()) }
             libs.findLibrary("androidx-lifecycle-viewmodel-compose").ifPresent { add("implementation", it.get()) }
