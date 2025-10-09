@@ -13,21 +13,20 @@ repositories {
     gradlePluginPortal()
 }
 
-
 dependencies {
     // Gradle API
     compileOnly(gradleApi())
 
     // AGP for compile-time types (compileOnly so AGP is not bundled)
-    compileOnly(libs.gradle)                      // your libs alias for com.android.tools.build:gradle
+    compileOnly(libs.gradle) // your libs alias for com.android.tools.build:gradle
 
     // Kotlin Gradle plugin types (compileOnly)
-    compileOnly(libs.kotlin.gradle.plugin)        // your libs alias for org.jetbrains.kotlin:kotlin-gradle-plugin
+    compileOnly(libs.kotlin.gradle.plugin) // your libs alias for org.jetbrains.kotlin:kotlin-gradle-plugin
 
     // TestKit and test runtime
-    testImplementation(gradleTestKit())                                  // Gradle TestKit
-    testImplementation(libs.junit.jupiter.api)       // JUnit API
-    testRuntimeOnly(libs.junit.jupiter.engine)      // JUnit engine to run tests
+    testImplementation(gradleTestKit()) // Gradle TestKit
+    testImplementation(libs.junit.jupiter.api) // JUnit API
+    testRuntimeOnly(libs.junit.jupiter.engine) // JUnit engine to run tests
     testImplementation(libs.assertj)
     implementation(kotlin("test"))
 }

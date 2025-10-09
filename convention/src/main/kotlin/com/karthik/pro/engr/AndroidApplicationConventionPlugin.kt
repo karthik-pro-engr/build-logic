@@ -66,7 +66,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             libs.findLibrary("androidx-lifecycle-viewmodel-ktx").ifPresent { add("implementation", it.get()) }
             libs.findLibrary("androidx-lifecycle-viewmodel-compose").ifPresent { add("implementation", it.get()) }
 
-
             // AppCompat + Material (safe defaults)
             libs.findLibrary("androidx-appcompat").ifPresent { add("implementation", it.get()) }
             libs.findLibrary("material").ifPresent { add("implementation", it.get()) }
