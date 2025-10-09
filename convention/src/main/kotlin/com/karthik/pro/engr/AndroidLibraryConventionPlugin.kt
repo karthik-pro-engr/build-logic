@@ -39,6 +39,9 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
             // Compose support for libraries that are UI modules (optional)
             libs.findLibrary("androidx-activity-compose").ifPresent { add("implementation", it.get()) }
+            // All Variants Preview
+            libs.findLibrary("all-variants-preview").ifPresent { add("implementation", it.get()) }
+
             libs.findLibrary("androidx-compose-bom").ifPresent { bom ->
                 val platformDep = project.dependencies.platform(bom.get())
                 add("implementation", platformDep)
