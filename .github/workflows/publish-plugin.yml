@@ -1,0 +1,61 @@
+# .github/workflows/publish-snapshot.yml
+name: Publish Convention Snapshot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - 'release/*'
+    tags:
+          - 'v*'
+
+# Give minimal permissions here. We require packages: write only for publish (push) job.
+permissions:
+  contents: read
+  packages: write   # this applies at workflow level; override at job-level if you prefer least privilege
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # We'll use a step to branch behavior between PR validation and real publish
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Determine run mode (validate vs publish)
+        id: set_mode
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "mode=validate" >> $GITHUB_OUTPUT
+          else
+            echo "mode=publish" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish validation (PRs) — publishToMavenLocal
+        if: steps.set_mode.outputs.mode == 'validate'
+        run: |
+          echo "PR validation mode — running publishToMavenLocal (no secrets required)"
+          chmod +x ./gradlew
+          ./gradlew :build-logic:convention:publishToMavenLocal --no-daemon
+
+      - name: Real publish (push to main)
+        if: steps.set_mode.outputs.mode == 'publish'
+        env:
+          GPR_USER: ${{ github.actor }}
+          # use a PAT or repo secret you configured. GITHUB_TOKEN may work in many cases,
+          # but some environments prefer an explicit PAT. Use secrets.GPR_TOKEN if you set one.
+          GPR_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Push to main — performing real publish"
+          chmod +x ./gradlew
+          ./gradlew :build-logic:convention:publish -Pgpr.user=$GPR_USER -Pgpr.key=$GPR_TOKEN --no-daemon
