@@ -47,7 +47,22 @@ gradlePlugin {
 publishing {
     // minimal explicit publication for the plugin implementation jar
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("androidApplicationPlugin") {
+            from(components["kotlin"])
+            groupId = "karthik.pro.engr"
+            artifactId = "android-application-plugin"    // explicit artifact for app plugin
+            version = project.version.toString()
+        }
+
+        create<MavenPublication>("androidLibraryPlugin") {
+            from(components["kotlin"])
+            groupId = "karthik.pro.engr"
+            artifactId = "android-library-plugin"        // explicit artifact for library plugin
+            version = project.version.toString()
+        }
+
+        // optional: keep convention-plugins for a combined bundle
+        create<MavenPublication>("conventionBundle") {
             from(components["java"])
             groupId = "karthik.pro.engr"
             artifactId = "convention-plugins"
