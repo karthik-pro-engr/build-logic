@@ -34,11 +34,11 @@ dependencies {
 gradlePlugin {
     plugins {
         create("androidApplicationPlugin") {
-            id = libs.plugins.karthik.pro.engr.android.application.get().pluginId
+            id = "karthik.pro.engr.android.application"
             implementationClass = "com.karthik.pro.engr.AndroidApplicationConventionPlugin"
         }
         create("androidLibraryPlugin") {
-            id = libs.plugins.karthik.pro.engr.android.library.get().pluginId
+            id = "karthik.pro.engr.android.library"
             implementationClass = "com.karthik.pro.engr.AndroidLibraryConventionPlugin"
         }
     }
