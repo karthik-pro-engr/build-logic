@@ -84,7 +84,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/karthik-pro-engr/architecting-state")
+            url = uri("https://maven.pkg.github.com/karthik-pro-engr/build-logic")
             credentials {
                 username = findProperty("gpr.user") as String? ?: System.getenv("GPR_USER")
                 password = findProperty("gpr.token") as String? ?: System.getenv("GPR_TOKEN")
