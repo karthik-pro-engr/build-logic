@@ -120,7 +120,7 @@ publishing {
 tasks.register("printPublications") {
     doLast {
         publishing.publications.forEach { p ->
-            println("publication: ${p.name} -> ${(p as? org.gradle.api.publish.maven.MavenPublication)?.artifactId} (group=${(p as? org.gradle.api.publish.maven.MavenPublication)?.groupId})")
+            println("publication: ${p.name} -> ${(p as? MavenPublication)?.artifactId} (group=${(p as? MavenPublication)?.groupId})")
         }
     }
 }
