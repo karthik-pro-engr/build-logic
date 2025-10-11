@@ -1,4 +1,3 @@
-# .github/workflows/publish-snapshot.yml
 name: Publish Convention Snapshot
 
 on:
@@ -9,17 +8,18 @@ on:
       - main
       - 'release/*'
     tags:
-          - 'v*'
+      - 'v*'
 
-# Give minimal permissions here. We require packages: write only for publish (push) job.
 permissions:
   contents: read
-  packages: write   # this applies at workflow level; override at job-level if you prefer least privilege
+  packages: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    # We'll use a step to branch behavior between PR validation and real publish
+    permissions:   # reinforce per-job permissions
+      contents: read
+      packages: write
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -52,10 +52,11 @@ jobs:
         if: steps.set_mode.outputs.mode == 'publish'
         env:
           GPR_USER: ${{ github.actor }}
-          # use a PAT or repo secret you configured. GITHUB_TOKEN may work in many cases,
-          # but some environments prefer an explicit PAT. Use secrets.GPR_TOKEN if you set one.
           GPR_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
+          if [ -z "$GPR_TOKEN" ]; then
+            echo "ERROR: GPR_TOKEN is empty"; exit 1
+          fi
           echo "Push to main — performing real publish"
           chmod +x ./gradlew
           ./gradlew :convention:publish -Pgpr.user=$GPR_USER -Pgpr.key=$GPR_TOKEN --no-daemon
