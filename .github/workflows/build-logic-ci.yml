@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   validate-convention:
-    name: Validate :convention (build · test · check · publish-to-mavenLocal)
+    name: Validate :convention
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository (full)
