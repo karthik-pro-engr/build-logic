@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 group = "karthik.pro.engr"
-version = "1.1.0"
+version = "1.2.3"
 
 repositories {
     google()
@@ -61,25 +61,49 @@ publishing {
             version = project.version.toString()
         }
 
-        // optional: keep convention-plugins for a combined bundle
-        create<MavenPublication>("conventionBundle") {
-            from(components["java"])
-            groupId = "karthik.pro.engr"
-            artifactId = "convention-plugins"
-            version = project.version.toString()
+    }
+
+    afterEvaluate {
+        // names we want to normalize
+        val mapping = mapOf(
+            // implementation publications you created:
+            "androidApplicationPlugin" to Pair("karthik.pro.engr", "android-application-plugin"),
+            "androidLibraryPlugin" to Pair("karthik.pro.engr", "android-library-plugin"),
+            // auto-generated plugin marker publications (override defaults)
+            "androidApplicationPluginPluginMarkerMaven" to Pair("karthik.pro.engr", "android-application-plugin-marker"),
+            "androidLibraryPluginPluginMarkerMaven" to Pair("karthik.pro.engr", "android-library-plugin-marker"),
+            "pluginMaven" to Pair("karthik.pro.engr", "convention-plugins-marker") // pick a safe artifactId
+        )
+
+        mapping.forEach { (pubName, coords) ->
+            publications.findByName(pubName)?.let { pub ->
+                (pub as MavenPublication).apply {
+                    groupId = coords.first
+                    artifactId = coords.second
+                    version = project.version.toString()
+                    // set a minimal, safe pom so registries accept it:
+                    pom {
+                        name.set(artifactId)
+                        description.set("Convention plugin artifact")
+                        url.set("https://github.com/karthik-pro-engr/build-logic")
+                        licenses {
+                            license {
+                                name.set("MIT")
+                                url.set("https://opensource.org/licenses/MIT")
+                            }
+                        }
+                        developers {
+                            developer {
+                                id.set("karthik-pro-engr")
+                                name.set("Karthik")
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
-    publications.withType<MavenPublication>().configureEach {
-        groupId = "karthik.pro.engr"
-        artifactId = when (name) {
-            "pluginMaven" -> "android.application.gradle.plugin"
-            "androidApplicationPluginPluginMarkerMaven" -> "android-application-plugin-marker"
-            "androidLibraryPluginPluginMarkerMaven" -> "android-library-plugin-marker"
-            "mavenJava" -> "convention-plugins"
-            else -> name.replace("Publication", "").lowercase().replace("[^a-z0-9.-]".toRegex(), "-")
-        }
-    }
 
     repositories {
         maven {
@@ -89,6 +113,14 @@ publishing {
                 username = findProperty("gpr.user") as String? ?: System.getenv("GPR_USER")
                 password = findProperty("gpr.token") as String? ?: System.getenv("GPR_TOKEN")
             }
+        }
+    }
+}
+
+tasks.register("printPublications") {
+    doLast {
+        publishing.publications.forEach { p ->
+            println("publication: ${p.name} -> ${(p as? org.gradle.api.publish.maven.MavenPublication)?.artifactId} (group=${(p as? org.gradle.api.publish.maven.MavenPublication)?.groupId})")
         }
     }
 }
