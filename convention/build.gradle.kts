@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 group = "karthik.pro.engr"
-version = "1.0.0"
+version = "1.1.0"
 
 repositories {
     google()
@@ -34,11 +34,11 @@ dependencies {
 gradlePlugin {
     plugins {
         create("androidApplicationPlugin") {
-            id = libs.plugins.karthik.pro.engr.android.application.get().pluginId
+            id = "karthik.pro.engr.android.application"
             implementationClass = "com.karthik.pro.engr.AndroidApplicationConventionPlugin"
         }
         create("androidLibraryPlugin") {
-            id = libs.plugins.karthik.pro.engr.android.library.get().pluginId
+            id = "karthik.pro.engr.android.library"
             implementationClass = "com.karthik.pro.engr.AndroidLibraryConventionPlugin"
         }
     }
@@ -47,7 +47,22 @@ gradlePlugin {
 publishing {
     // minimal explicit publication for the plugin implementation jar
     publications {
-        create<MavenPublication>("mavenJava") {
+        create<MavenPublication>("androidApplicationPlugin") {
+            from(components["kotlin"])
+            groupId = "karthik.pro.engr"
+            artifactId = "android-application-plugin"    // explicit artifact for app plugin
+            version = project.version.toString()
+        }
+
+        create<MavenPublication>("androidLibraryPlugin") {
+            from(components["kotlin"])
+            groupId = "karthik.pro.engr"
+            artifactId = "android-library-plugin"        // explicit artifact for library plugin
+            version = project.version.toString()
+        }
+
+        // optional: keep convention-plugins for a combined bundle
+        create<MavenPublication>("conventionBundle") {
             from(components["java"])
             groupId = "karthik.pro.engr"
             artifactId = "convention-plugins"

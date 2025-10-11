@@ -1,0 +1,97 @@
+name: Build-Logic CI (validate :convention)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - 'release/*'
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  checks: write
+  statuses: write
+  packages: write
+
+jobs:
+  validate-convention:
+    name: Validate :convention
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (full)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Locate gradlew wrapper
+        id: find_gradle
+        run: |
+          set -e
+          GRADLEW="$(git ls-files | grep -E '(^|/)(gradlew)$' | head -n1 || true)"
+          if [ -z "$GRADLEW" ]; then
+            GRADLEW="$(find . -maxdepth 4 -type f -name gradlew | sed 's|^\./||' | head -n1 || true)"
+          fi
+          if [ -z "$GRADLEW" ]; then
+            echo "::error::gradlew not found. Commit gradlew + gradle/wrapper/* to this repo."
+            exit 1
+          fi
+          echo "Found gradlew at: ${GRADLEW}"
+          echo "GRADLEW_PATH=${GRADLEW}" >> "$GITHUB_ENV"
+
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Make gradlew executable
+        run: chmod +x "${{ env.GRADLEW_PATH }}"
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties', '**/*.gradle*', '**/gradle.properties') }}
+
+      - name: "Run :convention build, check, test"
+        run: |
+          echo "Running :convention:build :convention:check :convention:test"
+          "./${{ env.GRADLEW_PATH }}" :convention:build :convention:check :convention:test --no-daemon
+
+      - name: "PR: publishToMavenLocal validation (safe)"
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "PR detected — validate publishing with publishToMavenLocal"
+          "./${{ env.GRADLEW_PATH }}" :convention:publishToMavenLocal --no-daemon
+
+      - name: "Push to main: real publish to GitHub Packages (optional)"
+        if: >
+          github.event_name == 'push' &&
+          (contains(github.ref, 'refs/heads/main') || startsWith(github.ref, 'refs/tags/'))
+        env:
+          GPR_USER: ${{ github.actor }}
+          GPR_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Push to main/tag: publishing to GitHub Packages (requires secrets.GPR_TOKEN)"
+          if [ -z "$GPR_TOKEN" ]; then
+            echo "::error::GPR_TOKEN (or GITHUB_TOKEN) not provided. Set secrets.GPR_TOKEN to enable publish."
+            exit 1
+          fi
+          "./${{ env.GRADLEW_PATH }}" :convention:publishAllPublicationsToGitHubPackagesRepository -Pgpr.user="$GPR_USER" -Pgpr.key="$GPR_TOKEN" --no-daemon
+
+      - name: Upload build artifacts (reports)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: convention-artifacts
+          path: |
+            convention/build/reports
+            **/build/reports
+            convention/build/libs
+            **/build/libs
