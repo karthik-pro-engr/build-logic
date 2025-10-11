@@ -46,7 +46,7 @@ jobs:
         run: |
           echo "PR validation mode — running publishToMavenLocal (no secrets required)"
           chmod +x ./gradlew
-          ./gradlew :build-logic:convention:publishToMavenLocal --no-daemon
+          ./gradlew :convention:publishToMavenLocal --no-daemon
 
       - name: Real publish (push to main)
         if: steps.set_mode.outputs.mode == 'publish'
@@ -58,4 +58,4 @@ jobs:
         run: |
           echo "Push to main — performing real publish"
           chmod +x ./gradlew
-          ./gradlew :build-logic:convention:publish -Pgpr.user=$GPR_USER -Pgpr.key=$GPR_TOKEN --no-daemon
+          ./gradlew :convention:publish -Pgpr.user=$GPR_USER -Pgpr.key=$GPR_TOKEN --no-daemon
