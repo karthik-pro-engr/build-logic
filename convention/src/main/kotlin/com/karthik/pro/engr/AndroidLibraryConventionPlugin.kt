@@ -50,6 +50,10 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 // Optionally add to testImplementation if you have JVM compose tests
                 add("testImplementation", platformDep)
             }
+            // ViewModel helpers
+            libs.findLibrary("androidx-lifecycle-viewmodel-ktx").ifPresent { add("implementation", it.get()) }
+            libs.findLibrary("androidx-lifecycle-viewmodel-compose").ifPresent { add("implementation", it.get()) }
+
             libs.findLibrary("androidx-ui").ifPresent { add("implementation", it.get()) }
             libs.findLibrary("androidx-ui-graphics").ifPresent { add("implementation", it.get()) }
             libs.findLibrary("androidx-ui-tooling-preview").ifPresent { add("implementation", it.get()) }

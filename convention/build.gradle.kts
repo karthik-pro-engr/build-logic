@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 group = "karthik.pro.engr"
-version = "1.2.3"
+version = "1.3.0"
 
 repositories {
     google()
